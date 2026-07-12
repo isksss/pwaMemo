@@ -11,7 +11,7 @@ const standalone = ref(false)
 const installState = computed(() =>
   resolvePwaInstallState({
     showInstallPrompt: Boolean($pwa?.showInstallPrompt),
-    isStandalone: standalone.value,
+    isStandalone: standalone.value || Boolean($pwa?.isPWAInstalled),
     isSecureContext: window.isSecureContext,
     serviceWorkerSupported: 'serviceWorker' in navigator,
   }),

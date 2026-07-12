@@ -17,6 +17,7 @@ const reload = () => window.location.reload()
 
 <template>
   <UApp :locale="ja">
+    <NuxtPwaManifest />
     <div v-if="!ready" class="grid min-h-screen place-items-center p-6">
       <UCard class="w-full max-w-md text-center">
         <UIcon v-if="!error" name="i-lucide-loader-circle" class="text-primary mx-auto size-10 animate-spin" />
