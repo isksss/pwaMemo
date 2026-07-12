@@ -1,0 +1,10 @@
+.nuxt
+.output
+dist
+node_modules
+.wrangler
+test-results
+playwright-report
+coverage
+.dev.vars
+*.log

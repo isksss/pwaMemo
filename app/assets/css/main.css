@@ -1,0 +1,45 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+:root {
+  font-family: 'Noto Sans JP', system-ui, sans-serif;
+}
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+.prose-memo {
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.prose-memo h1,
+.prose-memo h2,
+.prose-memo h3 {
+  margin-block: 1em 0.5em;
+  font-weight: 700;
+}
+.prose-memo p,
+.prose-memo ul,
+.prose-memo ol,
+.prose-memo pre {
+  margin-block: 0.75em;
+}
+.prose-memo ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.prose-memo ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.prose-memo code {
+  background: var(--ui-bg-elevated);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.3rem;
+}
