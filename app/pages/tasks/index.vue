@@ -53,7 +53,9 @@ const byStatus = (value: TaskStatus) => tasks.value.filter((task) => task.status
     <UDashboardPanel>
       <template #header
         ><AppPageHeader title="タスク"
-          ><UButton icon="i-lucide-plus" label="新規タスク" @click="edit()" /></AppPageHeader
+          ><div class="flex items-center gap-2">
+            <UColorModeButton data-testid="task-color-mode" />
+            <UButton icon="i-lucide-plus" label="新規タスク" @click="edit()" /></div></AppPageHeader
         ><UDashboardToolbar
           ><template #left
             ><UInput v-model="search" icon="i-lucide-search" placeholder="タスクを検索" /><USelect

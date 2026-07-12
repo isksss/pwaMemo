@@ -1,14 +1,48 @@
 <script setup lang="ts">
 import type { BackupEnvelope, RestoreMode } from '~/types/domain'
+import { resolvePwaInstallState } from '~/utils/pwa-install'
 const toast = useToast()
+const { $pwa } = useNuxtApp()
 const storage = ref<{ usage?: number; quota?: number }>({})
 const persistent = ref(false)
 const restoring = ref(false)
-const installable = computed(() => useNuxtApp().$pwa?.showInstallPrompt)
+const installing = ref(false)
+const standalone = ref(false)
+const installState = computed(() =>
+  resolvePwaInstallState({
+    showInstallPrompt: Boolean($pwa?.showInstallPrompt),
+    isStandalone: standalone.value,
+    isSecureContext: window.isSecureContext,
+    serviceWorkerSupported: 'serviceWorker' in navigator,
+  }),
+)
 onMounted(async () => {
+  standalone.value = window.matchMedia('(display-mode: standalone)').matches
   if (navigator.storage?.estimate) storage.value = await navigator.storage.estimate()
   if (navigator.storage?.persisted) persistent.value = await navigator.storage.persisted()
 })
+async function install() {
+  if (!installState.value.canInstall || installing.value) return
+  installing.value = true
+  try {
+    await $pwa?.install()
+    // vite-plugin-pwaはブラウザのuserChoiceを公開しないため、プロンプト消失を操作完了として扱う。
+    // キャンセル時にも再度プロンプト可能になる場合があるので、断定せず利用者が確認できる文言にする。
+    toast.add({
+      title: 'インストール画面を閉じました',
+      description: '完了していない場合は、ブラウザメニューからもう一度インストールできます。',
+      color: 'success',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'インストールできませんでした',
+      description: error instanceof Error ? error.message : String(error),
+      color: 'error',
+    })
+  } finally {
+    installing.value = false
+  }
+}
 const mb = (v?: number) => (v ? `${(v / 1024 / 1024).toFixed(1)} MB` : '不明')
 async function backup() {
   const data = await useDataService().exportBackup()
@@ -60,18 +94,29 @@ async function notification() {
       ><div class="mx-auto grid max-w-3xl gap-4">
         <UCard
           ><template #header><b>アプリ</b></template>
-          <div class="flex flex-wrap gap-2">
-            <UColorModeSelect /><UButton
-              v-if="installable"
-              icon="i-lucide-download"
-              label="インストール"
-              @click="useNuxtApp().$pwa?.install()"
-            /><UButton
-              icon="i-lucide-bell"
-              color="neutral"
-              variant="outline"
-              label="通知を有効化"
-              @click="notification"
+          <div class="space-y-3">
+            <div class="flex flex-wrap gap-2">
+              <UColorModeSelect /><UButton
+                icon="i-lucide-download"
+                label="アプリをインストール"
+                :disabled="!installState.canInstall"
+                :loading="installing"
+                @click="install"
+              /><UButton
+                icon="i-lucide-bell"
+                color="neutral"
+                variant="outline"
+                label="通知を有効化"
+                @click="notification"
+              />
+            </div>
+            <UAlert
+              data-testid="pwa-install-status"
+              :color="installState.canInstall ? 'success' : 'neutral'"
+              variant="subtle"
+              icon="i-lucide-monitor-down"
+              :title="installState.title"
+              :description="installState.description"
             /></div></UCard
         ><UCard
           ><template #header><b>ストレージ</b></template>

@@ -9,7 +9,12 @@ import {
   type TaskInput,
 } from '~/types/domain'
 
-const props = defineProps<{ task?: Task | null; tasks: Task[]; tags: { id: string; name: string }[] }>()
+const props = defineProps<{
+  task?: Task | null
+  tasks: Task[]
+  tags: { id: string; name: string }[]
+  initialValues?: Pick<TaskInput, 'startAt' | 'dueAt'>
+}>()
 const emit = defineEmits<{ saved: []; cancel: [] }>()
 const toast = useToast()
 const saving = ref(false)
@@ -29,8 +34,8 @@ const form = reactive<TaskInput>({
 })
 
 watch(
-  () => props.task,
-  (task) =>
+  () => [props.task, props.initialValues] as const,
+  ([task]) =>
     Object.assign(
       form,
       task
@@ -56,8 +61,8 @@ watch(
             status: 'todo',
             priority: null,
             parentId: null,
-            startAt: null,
-            dueAt: null,
+            startAt: props.initialValues?.startAt ?? null,
+            dueAt: props.initialValues?.dueAt ?? null,
             estimatedMinutes: 0,
             actualMinutes: 0,
             tagIds: [],
